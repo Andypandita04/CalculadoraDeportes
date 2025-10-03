@@ -90,7 +90,11 @@ export default function BudgetSummaryPage() {
   // Calculate weekly cost (weeks instead of days)
   const weeklyCostMXN = dailyCostMXN * 7;
   const weeklyCostLocal = dailyCostLocal * 7;
-  const totalWeeks = Math.ceil(duration / 7);
+  const durationInWeeks = Math.ceil(duration / 7);
+  
+  // Calculate total trip cost
+  const totalCostMXN = dailyCostMXN * duration;
+  const totalCostLocal = dailyCostLocal * duration;
   
   // Calculate benefits/savings
   const benefits = calculateBenefits(countryData, duration, startMonth, startYear);
@@ -144,7 +148,7 @@ export default function BudgetSummaryPage() {
                     <div className="flex items-center space-x-6 text-gray-600">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4" />
-                        <span>{totalWeeks} semana{totalWeeks > 1 ? 's' : ''}</span>
+                        <span>{durationInWeeks} semana{durationInWeeks > 1 ? 's' : ''}</span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
@@ -181,11 +185,29 @@ export default function BudgetSummaryPage() {
                 </CardContent>
               </Card>
               
+              {/* Total Trip Cost */}
+              <Card className="border-2 border-[#00CF0C]">
+                <CardContent className="p-6 text-center space-y-4">
+                  <h2 className="text-xl font-semibold text-gray-900">Gasto total del viaje</h2>
+                  <div className="space-y-2">
+                    <div className="text-3xl font-bold text-[#00CF0C]">
+                      ${Math.round(totalCostMXN).toLocaleString('es-MX')} MXN
+                    </div>
+                    <div className="text-lg text-gray-600">
+                      ${Math.round(totalCostLocal).toLocaleString('es-MX')} • {localCurrency}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {durationInWeeks} {durationInWeeks === 1 ? 'semana' : 'semanas'} en {travelSelection?.country}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Weekly and One-off Costs Breakdown */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    Cuánto necesitarías a la semana
+                    ¿Cuánto necesitarías a la semana?
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -310,73 +332,65 @@ export default function BudgetSummaryPage() {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Dropdown Disclaimer */}
+              <Card>
+                <CardHeader 
+                  className="cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => setShowDisclaimer(!showDisclaimer)}
+                >
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    <span>Ten en cuenta que:</span>
+                    {showDisclaimer ? (
+                      <ChevronUp className="h-5 w-5" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                
+                {showDisclaimer && (
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        Aviso y limitación de responsabilidad
+                      </h4>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        Las estimaciones de esta calculadora son referenciales y pueden variar por tipo de cambio, 
+                        temporada, políticas locales y comisiones. Incluyen supuestos de costos básicos, extras y 
+                        un colchón del 10%, con conversión a MXN según tipo de cambio real y tipo de cambio preventivo.
+                        Esta herramienta no garantiza precios ni constituye oferta o contrato. Los resultados son 
+                        solo para fines informativos y deben validarse con proveedores oficiales antes de tomar 
+                        decisiones. La empresa y sus afiliados no asumen responsabilidad por diferencias con costos reales.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        Aviso legal y limitación de responsabilidad
+                      </h4>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        Esta calculadora es una herramienta orientativa para estimar costos de vida y viaje en 
+                        distintos países y monedas (USD, CAD, EUR, GBP, JPY, KRW, CNY, AUD, NZD, ARS, CLP, BRL, COP, PEN).
+                        Los cálculos incluyen hospedaje, alimentación, transporte, entretenimiento, seguros, trámites, 
+                        comunicaciones, actividades, extras, comisiones financieras y un colchón de imprevistos (10%), 
+                        convertidos a MXN con tipo de cambio real y un tipo de cambio preventivo.
+                        Los valores mostrados no son precios finales, pues dependen de factores externos: variación 
+                        cambiaria, temporada, disponibilidad, políticas locales, impuestos o comisiones adicionales.
+                        Esta información no constituye oferta, contrato, cotización ni garantía de precio o servicio.
+                        La empresa responsable, sus afiliadas y socios no asumen responsabilidad por discrepancias 
+                        entre los resultados estimados y los costos reales ni por decisiones basadas en estos resultados.
+                        El usuario es responsable de verificar condiciones vigentes con proveedores oficiales 
+                        (aerolíneas, alojamientos, bancos, consulados, operadores turísticos).
+                        El uso de esta herramienta implica la aceptación de estas limitaciones.
+                      </p>
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
             </motion.div>
           </div>
-          
-          {/* Disclaimer Section */}
-          <motion.div
-            className="space-y-6"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-          >
-            
-            {/* Dropdown Disclaimer */}
-            <Card>
-              <CardHeader 
-                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => setShowDisclaimer(!showDisclaimer)}
-              >
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Ten en cuenta que:</span>
-                  {showDisclaimer ? (
-                    <ChevronUp className="h-5 w-5" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5" />
-                  )}
-                </CardTitle>
-              </CardHeader>
-              
-              {showDisclaimer && (
-                <CardContent className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">
-                      Aviso y limitación de responsabilidad
-                    </h4>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      Las estimaciones de esta calculadora son referenciales y pueden variar por tipo de cambio, 
-                      temporada, políticas locales y comisiones. Incluyen supuestos de costos básicos, extras y 
-                      un colchón del 10%, con conversión a MXN según tipo de cambio real y tipo de cambio preventivo.
-                      Esta herramienta no garantiza precios ni constituye oferta o contrato. Los resultados son 
-                      solo para fines informativos y deben validarse con proveedores oficiales antes de tomar 
-                      decisiones. La empresa y sus afiliados no asumen responsabilidad por diferencias con costos reales.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">
-                      Aviso legal y limitación de responsabilidad
-                    </h4>
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      Esta calculadora es una herramienta orientativa para estimar costos de vida y viaje en 
-                      distintos países y monedas (USD, CAD, EUR, GBP, JPY, KRW, CNY, AUD, NZD, ARS, CLP, BRL, COP, PEN).
-                      Los cálculos incluyen hospedaje, alimentación, transporte, entretenimiento, seguros, trámites, 
-                      comunicaciones, actividades, extras, comisiones financieras y un colchón de imprevistos (10%), 
-                      convertidos a MXN con tipo de cambio real y un tipo de cambio preventivo.
-                      Los valores mostrados no son precios finales, pues dependen de factores externos: variación 
-                      cambiaria, temporada, disponibilidad, políticas locales, impuestos o comisiones adicionales.
-                      Esta información no constituye oferta, contrato, cotización ni garantía de precio o servicio.
-                      La empresa responsable, sus afiliadas y socios no asumen responsabilidad por discrepancias 
-                      entre los resultados estimados y los costos reales ni por decisiones basadas en estos resultados.
-                      El usuario es responsable de verificar condiciones vigentes con proveedores oficiales 
-                      (aerolíneas, alojamientos, bancos, consulados, operadores turísticos).
-                      El uso de esta herramienta implica la aceptación de estas limitaciones.
-                    </p>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          </motion.div>
+
           
           {/* Footer */}
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
