@@ -1,38 +1,32 @@
 generator client {
-    provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/presupuesto_viajero/app/node_modules/.prisma/client"
+  provider      = "prisma-client-js"
+  output        = "/home/ubuntu/presupuesto_viajero/app/node_modules/.prisma/client"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// Tabla para registrar los formularios de viaje completados
 model TripForm {
-  id                String   @id @default(cuid())
-  
-  // Campos requeridos del formulario
-  continent         String
-  country           String
-  durationWeeks     Int      // Duración en semanas
-  month             Int      // 1-12
-  year              Int      // 2025+
-  totalAmount       Decimal  @db.Decimal(10,2) // Monto total en MXN
-  totalSavings      Decimal  @db.Decimal(10,2) // Ahorro total en MXN
-  preferredBenefit  String   // A, B, C, D
-  fullName          String
-  email             String
-  
-  // Metadata
-  sessionId         String?
-  ipAddress         String?  // hasheada para privacidad
-  userAgent         String?
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  id               String   @id @default(cuid())
+  continent        String
+  country          String
+  durationWeeks    Int
+  month            Int
+  year             Int
+  totalAmount      Decimal  @db.Decimal(10, 2)
+  totalSavings     Decimal  @db.Decimal(10, 2)
+  preferredBenefit String
+  fullName         String
+  email            String
+  sessionId        String?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
   @@index([country])
   @@index([continent])
   @@index([createdAt])
