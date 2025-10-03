@@ -15,7 +15,7 @@ export function useUsageTracking() {
     eventPayload?: Record<string, any>
   ) => {
     try {
-      await fetch('/api/usage', {
+      const response = await fetch('/api/usage', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,6 +27,14 @@ export function useUsageTracking() {
           eventPayload
         })
       });
+      
+      // Verificar que la respuesta sea OK y contenga JSON válido
+      if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          await response.json();
+        }
+      }
     } catch (error) {
       console.warn('Error tracking event:', error);
       // No bloqueamos la UI por errores de tracking
