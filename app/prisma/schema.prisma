@@ -1,7 +1,7 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/calculadora_presupuesto_viajes/app/node_modules/.prisma/client"
+    output = "/home/ubuntu/presupuesto_viajero/app/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -9,94 +9,33 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-// Modelo para tipos de cambio
-model Currency {
-  id                String @id @default(uuid())
-  symbol            String @unique // USD, EUR, etc
-  isoCode           String
-  realExchangeRate  Float
-  paddedRate        Float
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+// Tabla para registrar los formularios de viaje completados
+model TripForm {
+  id                String   @id @default(cuid())
   
-  destinations      Destination[]
-  
-  @@map("currencies")
-}
-
-// Modelo para destinos de viaje
-model Destination {
-  id                String @id @default(uuid())
+  // Campos requeridos del formulario
   continent         String
   country           String
-  city              String?
-  currencyId        String
-  realExchangeRate  Float
-  paddedExchangeRate Float
-  imageUrl          String?
+  durationWeeks     Int      // Duración en semanas
+  month             Int      // 1-12
+  year              Int      // 2025+
+  totalAmount       Decimal  @db.Decimal(10,2) // Monto total en MXN
+  totalSavings      Decimal  @db.Decimal(10,2) // Ahorro total en MXN
+  preferredBenefit  String   // A, B, C, D
+  fullName          String
+  email             String
   
-  // Costos mensuales en moneda local
-  housingCost       Float
-  foodCost          Float
-  transportCost     Float
-  entertainmentCost Float
-  insuranceCost     Float
-  flightCost        Float
-  communicationCost Float
-  activitiesCost    Float
-  extrasCost        Float
-  contingencyPercent Float
-  bankFeesCost      Float
-  
-  // Totales calculados
-  totalMonthlyLocal Float
-  totalMonthlyMxnReal Float
-  totalMonthlyMxnPadded Float
+  // Metadata
+  sessionId         String?
+  ipAddress         String?  // hasheada para privacidad
+  userAgent         String?
   
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   
-  currency          Currency @relation(fields: [currencyId], references: [id])
-  
-  @@unique([country, city])
-  @@map("destinations")
-}
-
-// Modelo para formularios de viajes guardados
-model TripForm {
-  id                String @id @default(uuid())
-  
-  // Información del viaje
-  continente        String
-  pais              String
-  semanasDuracion   Int
-  mes               Int // 1-12
-  anio              Int // 2025-2030
-  
-  // Cálculos financieros
-  montoTotal        Float
-  ahorroTotal       Float
-  
-  // Datos del usuario
-  beneficioPreferido String
-  nombre            String
-  correoElectronico String
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  @@index([country])
+  @@index([continent])
+  @@index([createdAt])
+  @@index([email])
   @@map("trip_forms")
-}
-
-// Configuración de la aplicación
-model AppConfig {
-  id                  String @id @default(uuid())
-  key                 String @unique
-  value               String
-  description         String?
-  
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  
-  @@map("app_config")
 }

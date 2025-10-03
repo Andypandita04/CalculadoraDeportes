@@ -1,56 +1,36 @@
 
-// Utilidades para cálculos de fechas
-
-export function calculateWeeksUntilStart(startMonth: number, startYear: number): number {
+export function getDaysUntilStart(startMonth: number, startYear: number): number {
   const today = new Date();
-  const startDate = new Date(startYear, startMonth - 1, 1); // mes - 1 porque Date usa 0-based months
+  const startDate = new Date(startYear, startMonth - 1, 1); // mes - 1 porque Date usa 0-indexing
   
-  const diffInMs = startDate.getTime() - today.getTime();
-  const diffInWeeks = diffInMs / (1000 * 60 * 60 * 24 * 7);
+  const diffTime = startDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
-  return Math.max(0, Math.floor(diffInWeeks));
+  return Math.max(0, diffDays); // No puede ser negativo
 }
 
-export function formatStartDate(month: number, year: number): string {
-  const monthNames = [
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
-  ];
-  
-  return `${monthNames[month - 1]} ${year}`;
-}
-
-export function getMonthOptions(): Array<{ value: number; label: string }> {
+export function formatMonthYear(month: number, year: number): string {
   const months = [
-    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
   
-  return months.map((month, index) => ({
-    value: index + 1,
-    label: month
-  }));
+  return `${months[month - 1]} ${year}`;
 }
 
-export function getYearOptions(): Array<{ value: number; label: string }> {
-  const years = [];
+export function getAvailableYears(): number[] {
   const currentYear = new Date().getFullYear();
-  const startYear = Math.max(2025, currentYear);
-  
-  for (let year = startYear; year <= 2030; year++) {
-    years.push({
-      value: year,
-      label: year.toString()
-    });
-  }
-  
-  return years;
+  return Array.from({ length: 6 }, (_, i) => currentYear + i); // 2024-2029 o similar
 }
 
-export function validateStartDate(month: number, year: number): boolean {
-  const startDate = new Date(year, month - 1, 1);
-  const today = new Date();
+export function getAvailableMonths(): Array<{ value: number; label: string }> {
+  const months = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
   
-  // La fecha debe ser posterior a hoy y dentro del rango permitido
-  return startDate > today && year >= 2025 && year <= 2030;
+  return months.map((label, index) => ({
+    value: index + 1,
+    label
+  }));
 }

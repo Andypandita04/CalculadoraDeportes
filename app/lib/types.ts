@@ -1,92 +1,48 @@
 
-// Tipos TypeScript para la aplicación
-
-export interface Currency {
-  id: string;
-  symbol: string;
-  isoCode: string;
-  realExchangeRate: number;
-  paddedRate: number;
+export interface PageProps {
+  params: { [key: string]: string | string[] | undefined };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export interface Destination {
-  id: string;
-  continent: string;
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface UsageEventData {
+  eventType: 'page_view' | 'calculation_started' | 'calculation_completed' | 'form_submitted';
+  eventPage?: string;
+  sessionId?: string;
+  eventPayload?: Record<string, any>;
+}
+
+export interface OneOffCostEstimates {
+  flights: number; // Vuelos ida y vuelta en MXN
+  dataWifi: number; // Paquetes de datos y WiFi en MXN
+  eventTickets: number; // Costo promedio por evento * número de eventos
+  insuranceVisa: number; // Seguros y trámites en MXN
+  bebidasEvento: number; // Bebidas y comida dentro del evento en MXN
+  souvenirs: number; // Souvenirs en MXN
+}
+
+// Configuración por país para costos únicos (puede expandirse)
+export interface CountryOneOffCosts {
   country: string;
-  city?: string | null;
-  currencyId: string;
-  realExchangeRate: number;
-  paddedExchangeRate: number;
-  imageUrl?: string | null;
-  
-  // Costos mensuales en moneda local
-  housingCost: number;
-  foodCost: number;
-  transportCost: number;
-  entertainmentCost: number;
-  insuranceCost: number;
-  flightCost: number;
-  communicationCost: number;
-  activitiesCost: number;
-  extrasCost: number;
-  contingencyPercent: number;
-  bankFeesCost: number;
-  
-  // Totales calculados
-  totalMonthlyLocal: number;
-  totalMonthlyMxnReal: number;
-  totalMonthlyMxnPadded: number;
-  
-  currency: Currency;
+  flightCostMXN: number;
+  dataWifiCostMXN: number;
+  avgEventTicketCostMXN: number;
+  insuranceVisaCostMXN: number;
 }
 
-export interface TripForm {
-  id?: string;
-  continente: string;
-  pais: string;
-  semanasDuracion: number;
-  mes: number;
-  anio: number;
-  montoTotal: number;
-  ahorroTotal: number;
-  beneficioPreferido: string;
-  nombre: string;
-  correoElectronico: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+// Constantes de configuración
+export const DEFAULT_ONE_OFF_COSTS: CountryOneOffCosts = {
+  country: 'default',
+  flightCostMXN: 8500, // Vuelo promedio internacional
+  dataWifiCostMXN: 800, // Plan de datos internacional por semana
+  avgEventTicketCostMXN: 1200, // Boleto promedio evento deportivo
+  insuranceVisaCostMXN: 1500 // Seguro de viaje + trámites
+};
 
-// Interface temporal para mantener compatibilidad durante el proceso de carga inicial
-export interface TripFormDraft {
-  destinationId?: string | null;
-  otherCountry?: string | null;
-  weeks: number;
-  startMonth: number;
-  startYear: number;
-  destination?: Destination | null;
-}
-
-export interface Benefit {
-  id: string;
-  title: string;
-  description: string;
-  formula?: string;
-  weeklyAmountMxn: number;
-  weeklyAmountLocal: number;
-  totalAmountMxn: number;
-  currency: Currency;
-}
-
-export interface BenefitCalculation {
-  benefits: Benefit[];
-  totalWeeklyMxn: number;
-  totalAmountMxn: number;
-  totalWeeklyLocal: number;
-  totalAmountLocal: number;
-  equivalentWeeks: number;
-}
-
-export interface ExcelData {
-  currencies: Currency[];
-  destinations: Destination[];
-}
+export const TYPICAL_TRIP_DURATIONS = [3, 5, 7, 10, 14, 21, 28];
