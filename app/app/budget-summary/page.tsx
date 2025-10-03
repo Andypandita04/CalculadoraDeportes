@@ -3,20 +3,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Calculator } from 'lucide-react';
+import { ArrowRight, Calculator, MapPin, Calendar, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TravelSummary } from '@/components/travel-summary';
-import { MoneyTag } from '@/components/money-tag';
 import { BudgetBreakdown } from '@/components/budget-breakdown';
 import { LoadingSpinner } from '@/components/loading-spinner';
 
 import { useAppStore } from '@/lib/store';
 import { useCalculations } from '@/hooks/use-calculations';
 import { usePageTracking } from '@/hooks/use-usage-tracking';
-import { getDailyCosts } from '@/lib/excel';
+import { calculateBenefits } from '@/lib/benefits.daily';
+import { formatMonthYear } from '@/lib/dates';
 
 export default function BudgetSummaryPage() {
   const router = useRouter();
@@ -28,6 +27,7 @@ export default function BudgetSummaryPage() {
   
   const { calculateBudget, isLoading, error, isOtherCountry } = useCalculations();
   const [hasCalculated, setHasCalculated] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   
   // Track page view
   usePageTracking('/budget-summary');
@@ -53,7 +53,7 @@ export default function BudgetSummaryPage() {
     }
   }, [travelSelection?.country, travelSelection?.countryData, calculationResults, hasCalculated, isLoading]);
   
-  const handleViewBenefits = () => {
+  const handleDiscoverHow = () => {
     setCurrentStep('benefits');
     router.push('/benefits-breakdown');
   };
@@ -70,9 +70,9 @@ export default function BudgetSummaryPage() {
     );
   }
   
-  const { countryData, duration, numberOfEvents } = travelSelection;
+  const { countryData, duration, numberOfEvents, startMonth, startYear } = travelSelection;
   
-  if (!calculationResults) {
+  if (!calculationResults || !countryData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -85,21 +85,20 @@ export default function BudgetSummaryPage() {
     );
   }
   
-  const { dailyCostMXN, dailyCostLocal, localCurrency, oneOffCosts } = calculationResults;
+  const { dailyCostMXN, dailyCostLocal, localCurrency } = calculationResults;
   
-  if (!countryData) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Error: Faltan datos del país seleccionado</p>
-          <Button onClick={() => router.push('/selection')} className="mt-4">
-            Volver a selección
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Calculate weekly cost (weeks instead of days)
+  const weeklyCostMXN = dailyCostMXN * 7;
+  const weeklyCostLocal = dailyCostLocal * 7;
+  const totalWeeks = Math.ceil(duration / 7);
   
+  // Calculate benefits/savings
+  const benefits = calculateBenefits(countryData, duration, startMonth, startYear);
+  const totalSavings = benefits.totalBenefits;
+  
+  // Format departure date
+  const departureDate = formatMonthYear(startMonth, startYear);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -113,160 +112,280 @@ export default function BudgetSummaryPage() {
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Tu presupuesto está listo
+              Tu presupuesto de intercambio
             </h1>
             <p className="text-lg text-gray-600">
-              Aquí tienes el desglose completo de tu viaje a {travelSelection?.country}
+              Costos semanales estimados y oportunidades de ahorro
             </p>
           </div>
           
-          {/* Travel Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
-            <TravelSummary selection={travelSelection} />
-          </motion.div>
-          
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8">
             
-            {/* Main Budget Display */}
+            {/* Left Side - Trip Summary and Weekly Costs */}
             <motion.div
-              className="lg:col-span-2 space-y-6"
+              className="space-y-6"
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
             >
               
-              {/* Daily Cost Card */}
-              <Card className="bg-gradient-to-r from-[#00CF0C] to-[#007400] text-white shadow-xl">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="flex items-center justify-center space-x-2 mb-4">
-                    <Calculator className="h-6 w-6" />
-                    <h2 className="text-xl font-semibold">
-                      Para tu viaje necesitarás por día:
-                    </h2>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="text-4xl md:text-5xl font-bold">
-                      {Math.round(dailyCostMXN).toLocaleString('es-MX')} MXN
+              {/* Travel Summary (without image) */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <MapPin className="h-5 w-5 text-[#00CF0C]" />
+                      <span className="text-xl font-semibold text-gray-900">{travelSelection?.country}</span>
+                      {countryData?.currencyCode && (
+                        <span className="text-lg text-gray-500">({countryData.currencyCode})</span>
+                      )}
                     </div>
-                    <div className="text-lg opacity-90">
-                      ≈ {Math.round(dailyCostLocal).toLocaleString('es-MX')} {localCurrency}
+                    
+                    <div className="flex items-center space-x-6 text-gray-600">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{totalWeeks} semana{totalWeeks > 1 ? 's' : ''}</span>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>Inicio: {departureDate}</span>
+                      </div>
+                      
+                      {numberOfEvents > 0 && (
+                        <div className="flex items-center space-x-2">
+                          <Users className="h-4 w-4" />
+                          <span>{numberOfEvents} evento{numberOfEvents > 1 ? 's' : ''}</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  
-                  <div className="bg-white/20 rounded-lg p-4 mt-6">
-                    <p className="text-sm">
-                      Para {duration} días: <strong>{Math.round(dailyCostMXN * duration).toLocaleString('es-MX')} MXN</strong>
-                    </p>
                   </div>
                 </CardContent>
               </Card>
               
-              {/* Budget Breakdown */}
-              <BudgetBreakdown
-                countryData={countryData}
-                numberOfEvents={numberOfEvents}
-                exchangeRate={countryData?.exchangeRate || 1}
-                currencyCode={localCurrency || 'USD'}
-              />
+              {/* Weekly Cost Card */}
+              <Card className="bg-gradient-to-r from-[#00CF0C] to-[#007400] text-white shadow-xl">
+                <CardContent className="p-8 text-center space-y-4">
+                  <h2 className="text-xl font-semibold">
+                    Para el intercambio necesitarás a la semana:
+                  </h2>
+                  
+                  <div className="space-y-2">
+                    <div className="text-4xl md:text-5xl font-bold">
+                      ${Math.round(weeklyCostMXN).toLocaleString('es-MX')} MXN
+                    </div>
+                    <div className="text-lg opacity-90">
+                      ${Math.round(weeklyCostLocal).toLocaleString('es-MX')} • {localCurrency}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Weekly and One-off Costs Breakdown */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">
+                    Cuánto necesitarías a la semana
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Weekly Breakdown */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-3">Desglose por categoría (semanal)</h4>
+                    <div className="space-y-3">
+                      {[
+                        { 
+                          icon: '🏠', 
+                          label: 'Hospedaje', 
+                          weeklyMXN: ((countryData?.monthlyCosts?.hospedaje || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '🍽️', 
+                          label: 'Alimentos', 
+                          weeklyMXN: ((countryData?.monthlyCosts?.alimentos || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '🚗', 
+                          label: 'Transporte', 
+                          weeklyMXN: ((countryData?.monthlyCosts?.transporte || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '🎮', 
+                          label: 'Entretenimiento', 
+                          weeklyMXN: ((countryData?.monthlyCosts?.entretenimiento || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '🛡️', 
+                          label: 'Seguros/Trámites', 
+                          weeklyMXN: ((countryData?.monthlyCosts?.seguros || 0) / duration) * 7 * (countryData?.exchangeRate || 1)
+                        }
+                      ].filter(item => item.weeklyMXN > 0).map((item, index) => (
+                        <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="text-gray-700">{item.label}</span>
+                          </div>
+                          <span className="font-semibold">${Math.round(item.weeklyMXN).toLocaleString('es-MX')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* One-off Costs */}
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-3">Desglose por categoría (pagos únicos)</h4>
+                    <div className="space-y-3">
+                      {[
+                        { 
+                          icon: '✈️', 
+                          label: 'Vuelo de ida y vuelta', 
+                          amountMXN: (countryData?.oneTimeCosts?.vuelo || 0) * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '📱', 
+                          label: 'Paquetes de datos y WiFi', 
+                          amountMXN: (countryData?.oneTimeCosts?.comunicaciones || 0) * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '🎫', 
+                          label: `Costo promedio de boletos (${numberOfEvents} evento${numberOfEvents > 1 ? 's' : ''})`, 
+                          amountMXN: ((countryData?.oneTimeCosts?.entradas || 0) * numberOfEvents) * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '🍺', 
+                          label: 'Costos de consumo dentro del evento', 
+                          amountMXN: ((countryData?.oneTimeCosts?.bebidasEvento || 0) * numberOfEvents) * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '🛍️', 
+                          label: 'Costos souvenirs', 
+                          amountMXN: (countryData?.oneTimeCosts?.souvenirs || 0) * (countryData?.exchangeRate || 1)
+                        }
+                      ].filter(item => item.amountMXN > 0).map((item, index) => (
+                        <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="text-gray-700">{item.label}</span>
+                          </div>
+                          <span className="font-semibold">${Math.round(item.amountMXN).toLocaleString('es-MX')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
             
-            {/* Sidebar */}
+            {/* Right Side - Savings and CTA */}
             <motion.div
               className="space-y-6"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
             >
               
-              {/* CTA to Benefits */}
-              <Card className="border-[#00CF0C] shadow-lg">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-lg text-[#00CF0C]">
-                    💡 ¿Sabías que puedes ahorrar más?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-center space-y-4">
-                  <p className="text-gray-600">
-                    Descubre 4 formas de reducir tus costos y maximizar tu presupuesto de viaje.
-                  </p>
+              {/* Savings Card */}
+              <Card>
+                <CardContent className="p-6 text-center space-y-6">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Con nosotros podrías generar el siguiente ahorro para tu viaje:
+                  </h3>
+                  
+                  <div className="space-y-2">
+                    <div className="text-3xl font-bold text-[#00CF0C]">
+                      ${Math.round(totalSavings).toLocaleString('es-MX')}
+                    </div>
+                    <div className="text-lg text-gray-600">
+                      (${Math.round(totalSavings / (countryData?.exchangeRate || 1)).toLocaleString('es-MX')} {localCurrency})
+                    </div>
+                    <p className="text-sm text-gray-500">Ahorro estimado total</p>
+                  </div>
                   
                   <Button
                     size="lg"
-                    onClick={handleViewBenefits}
-                    className="w-full hover:scale-105 transition-transform duration-200"
+                    onClick={handleDiscoverHow}
+                    className="w-full bg-[#00CF0C] hover:bg-[#007400] hover:scale-105 transition-transform duration-200"
                   >
-                    Ver beneficios
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    Descubre cómo →
                   </Button>
                 </CardContent>
               </Card>
-              
-              {/* Quick Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-md">Resumen rápido</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Costo por día:</span>
-                    <span className="font-semibold">{Math.round(dailyCostMXN).toLocaleString('es-MX')} MXN</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Total {duration} días:</span>
-                    <span className="font-semibold">{Math.round(dailyCostMXN * duration).toLocaleString('es-MX')} MXN</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Moneda local:</span>
-                    <span className="font-semibold">{localCurrency}</span>
-                  </div>
-                  
-                  {numberOfEvents > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Eventos:</span>
-                      <span className="font-semibold">{numberOfEvents}</span>
-                    </div>
+            </motion.div>
+          </div>
+          
+          {/* Disclaimer Section */}
+          <motion.div
+            className="space-y-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+          >
+            
+            {/* Dropdown Disclaimer */}
+            <Card>
+              <CardHeader 
+                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => setShowDisclaimer(!showDisclaimer)}
+              >
+                <CardTitle className="text-lg flex items-center justify-between">
+                  <span>Ten en cuenta que:</span>
+                  {showDisclaimer ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
                   )}
-                  
-                  {oneOffCosts && (
-                    <div className="pt-3 border-t border-gray-200">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Pagos únicos:</span>
-                        <span className="font-semibold text-[#007400]">
-                          {Math.round(
-                            oneOffCosts.flights + 
-                            oneOffCosts.dataWifi + 
-                            oneOffCosts.eventTickets + 
-                            oneOffCosts.insuranceVisa +
-                            (oneOffCosts.bebidasEvento || 0) +
-                            (oneOffCosts.souvenirs || 0)
-                          ).toLocaleString('es-MX')} MXN
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                </CardTitle>
+              </CardHeader>
               
-              {/* Tips */}
-              <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-blue-900">💡 Tip</h4>
-                    <p className="text-sm text-blue-800">
-                      Los costos pueden variar según la temporada y ubicación específica. 
-                      Considera un colchón adicional del 10-15% para imprevistos.
+              {showDisclaimer && (
+                <CardContent className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      Aviso y limitación de responsabilidad
+                    </h4>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      Las estimaciones de esta calculadora son referenciales y pueden variar por tipo de cambio, 
+                      temporada, políticas locales y comisiones. Incluyen supuestos de costos básicos, extras y 
+                      un colchón del 10%, con conversión a MXN según tipo de cambio real y tipo de cambio preventivo.
+                      Esta herramienta no garantiza precios ni constituye oferta o contrato. Los resultados son 
+                      solo para fines informativos y deben validarse con proveedores oficiales antes de tomar 
+                      decisiones. La empresa y sus afiliados no asumen responsabilidad por diferencias con costos reales.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      Aviso legal y limitación de responsabilidad
+                    </h4>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      Esta calculadora es una herramienta orientativa para estimar costos de vida y viaje en 
+                      distintos países y monedas (USD, CAD, EUR, GBP, JPY, KRW, CNY, AUD, NZD, ARS, CLP, BRL, COP, PEN).
+                      Los cálculos incluyen hospedaje, alimentación, transporte, entretenimiento, seguros, trámites, 
+                      comunicaciones, actividades, extras, comisiones financieras y un colchón de imprevistos (10%), 
+                      convertidos a MXN con tipo de cambio real y un tipo de cambio preventivo.
+                      Los valores mostrados no son precios finales, pues dependen de factores externos: variación 
+                      cambiaria, temporada, disponibilidad, políticas locales, impuestos o comisiones adicionales.
+                      Esta información no constituye oferta, contrato, cotización ni garantía de precio o servicio.
+                      La empresa responsable, sus afiliadas y socios no asumen responsabilidad por discrepancias 
+                      entre los resultados estimados y los costos reales ni por decisiones basadas en estos resultados.
+                      El usuario es responsable de verificar condiciones vigentes con proveedores oficiales 
+                      (aerolíneas, alojamientos, bancos, consulados, operadores turísticos).
+                      El uso de esta herramienta implica la aceptación de estas limitaciones.
                     </p>
                   </div>
                 </CardContent>
-              </Card>
-            </motion.div>
+              )}
+            </Card>
+          </motion.div>
+          
+          {/* Footer */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p className="text-sm text-yellow-800 leading-relaxed">
+              <strong>AVISO:</strong> Los cálculos mostrados son estimaciones referenciales en distintas monedas y países. 
+              Los costos reales pueden variar por tipo de cambio, temporada, comisiones o políticas locales. 
+              Esta calculadora no constituye oferta ni garantía de precio. Verifica siempre con proveedores 
+              oficiales antes de contratar o viajar.
+            </p>
           </div>
         </motion.div>
       </div>
