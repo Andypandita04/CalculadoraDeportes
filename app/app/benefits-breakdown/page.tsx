@@ -40,17 +40,18 @@ export default function BenefitsBreakdownPage() {
   // Redirect if missing data
   useEffect(() => {
     if (!travelSelection?.country || !travelSelection?.countryData || !calculationResults) {
-      router.push('/budget-summary');
+      router.replace('/budget-summary');
     }
   }, [travelSelection, calculationResults, router]);
   
-  if (!calculationResults || !calculationResults?.benefits) {
+  // Early return si no hay datos completos
+  if (!travelSelection?.country || !travelSelection?.countryData || !calculationResults?.benefits) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex items-center justify-center">
         <div className="text-center space-y-4">
           <LoadingSpinner size="lg" />
-          <h2 className="text-xl font-semibold text-gray-900">Calculando tus beneficios...</h2>
-          <p className="text-gray-600">Preparando tu plan de ahorro personalizado</p>
+          <h2 className="text-xl font-semibold text-gray-900">Redirigiendo...</h2>
+          <p className="text-gray-600">Preparando tus datos de cálculo</p>
         </div>
       </div>
     );

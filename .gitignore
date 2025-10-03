@@ -98,3 +98,6 @@ temp/
 # Prisma
 # Keep the schema and migrations, but ignore client generated files
 prisma/client/
+
+# Form data (JSON files with sensitive user information)
+app/data/form-submissions.json
