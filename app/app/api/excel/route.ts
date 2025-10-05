@@ -12,8 +12,9 @@ export async function GET() {
     const excelPath = path.join(process.cwd(), 'data', 'Dinamica_Presupuesto_ViajeroEventoDeportivo.xlsx');
     const buffer = await fs.readFile(excelPath);
     
-    // Procesar el archivo Excel
-    const data = processExcelFile(buffer);
+    // Procesar el archivo Excel - Convertir Buffer a ArrayBuffer para compatibilidad con Vercel
+    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    const data = processExcelFile(arrayBuffer);
     
     return NextResponse.json({
       success: true,
