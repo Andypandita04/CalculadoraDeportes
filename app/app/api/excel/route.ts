@@ -13,7 +13,11 @@ export async function GET() {
     const buffer = await fs.readFile(excelPath);
     
     // Procesar el archivo Excel - Convertir Buffer a ArrayBuffer para compatibilidad con Vercel
-    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    const arrayBuffer = new ArrayBuffer(buffer.length);
+    const view = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < buffer.length; i++) {
+      view[i] = buffer[i];
+    }
     const data = processExcelFile(arrayBuffer);
     
     return NextResponse.json({
