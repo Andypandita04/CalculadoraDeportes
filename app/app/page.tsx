@@ -93,7 +93,7 @@ export default function HomePage() {
                 </p>
               </motion.div>
 
-              {/* Features highlight */}
+              {/* Features highlight 
               <motion.div 
                 className="grid grid-cols-2 gap-6 pt-8"
                 initial={{ opacity: 0 }}
@@ -131,7 +131,7 @@ export default function HomePage() {
                   <h3 className="font-semibold text-gray-900">Global</h3>
                   <p className="text-sm text-gray-600">Destinos en todo el mundo</p>
                 </div>
-              </motion.div>
+              </motion.div> */}
 
 
 

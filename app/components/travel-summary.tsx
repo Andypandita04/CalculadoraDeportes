@@ -2,7 +2,7 @@
 'use client';
 
 import Image from 'next/image';
-import { MapPin, Calendar, Users } from 'lucide-react';
+import { MapPin, Calendar, Ticket } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatMonthYear } from '@/lib/dates';
 import { TravelSelection } from '@/lib/store';
@@ -63,7 +63,7 @@ export function TravelSummary({ selection, className }: TravelSummaryProps) {
               
               {numberOfEvents > 0 && (
                 <div className="flex items-center space-x-1">
-                  <Users className="h-3 w-3" />
+                  <Ticket className="h-3 w-3" />
                   <span>{numberOfEvents} eventos</span>
                 </div>
               )}
