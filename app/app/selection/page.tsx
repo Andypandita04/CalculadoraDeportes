@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArrowRight, Users } from 'lucide-react';
+import { ArrowRight, Ticket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
@@ -145,7 +145,7 @@ export default function SelectionPage() {
                           ¿A cuántos eventos deportivos piensas ir durante tu viaje?
                         </h3>
                         <div className="flex items-center space-x-3">
-                          <Users className="h-4 w-4 text-[#00CF0C]" />
+                          <Ticket className="h-4 w-4 text-[#00CF0C]" />
                           <Input
                             type="number"
                             min="0"

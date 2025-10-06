@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Calculator, MapPin, Calendar, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, Calculator, MapPin, Calendar, Ticket, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
@@ -173,7 +173,7 @@ export default function BudgetSummaryPage() {
                       
                       {numberOfEvents > 0 && (
                         <div className="flex items-center space-x-2">
-                          <Users className="h-4 w-4" />
+                          <Ticket className="h-4 w-4" />
                           <span>{numberOfEvents} evento{numberOfEvents > 1 ? 's' : ''}</span>
                         </div>
                       )}

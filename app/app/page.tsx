@@ -59,45 +59,7 @@ export default function HomePage() {
               </Button>
             </motion.div>
             
-            {/* Features highlight */}
-            <motion.div 
-              className="grid grid-cols-2 gap-6 pt-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-            >
-              <div className="space-y-2">
-                <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
-                  <span className="text-[#00CF0C] font-bold">💰</span>
-                </div>
-                <h3 className="font-semibold text-gray-900">Cálculo preciso</h3>
-                <p className="text-sm text-gray-600">Presupuesto diario personalizado por país</p>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
-                  <span className="text-[#00CF0C] font-bold">🏆</span>
-                </div>
-                <h3 className="font-semibold text-gray-900">Eventos deportivos</h3>
-                <p className="text-sm text-gray-600">Especializado en viajes deportivos</p>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
-                  <span className="text-[#00CF0C] font-bold">💡</span>
-                </div>
-                <h3 className="font-semibold text-gray-900">Tips de ahorro</h3>
-                <p className="text-sm text-gray-600">Descubre cómo ahorrar más</p>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
-                  <span className="text-[#00CF0C] font-bold">🌍</span>
-                </div>
-                <h3 className="font-semibold text-gray-900">Global</h3>
-                <p className="text-sm text-gray-600">Destinos en todo el mundo</p>
-              </div>
-            </motion.div>
+            
           </motion.div>
           
           {/* Lado derecho - Imagen */}
@@ -130,7 +92,53 @@ export default function HomePage() {
                   Planifica tu próximo viaje deportivo
                 </p>
               </motion.div>
-            </div>
+
+              {/* Features highlight */}
+              <motion.div 
+                className="grid grid-cols-2 gap-6 pt-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.6 }}
+              >
+                <div className="space-y-2">
+                  <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
+                    <span className="text-[#00CF0C] font-bold">💰</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Cálculo preciso</h3>
+                  <p className="text-sm text-gray-600">Presupuesto diario personalizado por país</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
+                    <span className="text-[#00CF0C] font-bold">🏆</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Eventos deportivos</h3>
+                  <p className="text-sm text-gray-600">Especializado en viajes deportivos</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
+                    <span className="text-[#00CF0C] font-bold">💡</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Tips de ahorro</h3>
+                  <p className="text-sm text-gray-600">Descubre cómo ahorrar más</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="w-8 h-8 bg-[#00CF0C]/10 rounded-lg flex items-center justify-center">
+                    <span className="text-[#00CF0C] font-bold">🌍</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Global</h3>
+                  <p className="text-sm text-gray-600">Destinos en todo el mundo</p>
+                </div>
+              </motion.div>
+
+
+
+
+
+
+            </div> {/* Fin del contenedor de la imagen */}
           </motion.div>
         </div>
       </div>
