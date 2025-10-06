@@ -131,7 +131,7 @@ export default function BudgetSummaryPage() {
           {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Tu presupuesto de intercambio
+              Tu presupuesto de viajes
             </h1>
             <p className="text-base text-gray-600">
               Costos diarios estimados y oportunidades de ahorro
