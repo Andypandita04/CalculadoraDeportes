@@ -6,16 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Calculator, MapPin, Calendar, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-import { Button } from '@/c                        { 
-                          icon: '🛡️', 
-                          label: 'Seguros/Trámites', 
-                          amountMXN: (countryData?.monthlyCosts?.seguros || 0) * (countryData?.exchangeRate || 1)
-                        },
-                        { 
-                          icon: '📶', 
-                          label: 'Paquetes de datos y WiFi', 
-                          amountMXN: (countryData?.oneTimeCosts?.comunicaciones || 0) * (countryData?.exchangeRate || 1)
-                        },ui/button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BudgetBreakdown } from '@/components/budget-breakdown';
 import { LoadingSpinner } from '@/components/loading-spinner';
@@ -286,7 +277,7 @@ export default function BudgetSummaryPage() {
                           amountMXN: (countryData?.oneTimeCosts?.vuelo || 0) * (countryData?.exchangeRate || 1)
                         },
                         { 
-                          icon: '�️', 
+                          icon: '�', 
                           label: 'Seguros/Trámites', 
                           amountMXN: (countryData?.monthlyCosts?.seguros || 0) * (countryData?.exchangeRate || 1)
                         },
