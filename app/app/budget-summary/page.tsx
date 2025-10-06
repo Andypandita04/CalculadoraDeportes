@@ -6,7 +6,16 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Calculator, MapPin, Calendar, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/c                        { 
+                          icon: '🛡️', 
+                          label: 'Seguros/Trámites', 
+                          amountMXN: (countryData?.monthlyCosts?.seguros || 0) * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '📶', 
+                          label: 'Paquetes de datos y WiFi', 
+                          amountMXN: (countryData?.oneTimeCosts?.comunicaciones || 0) * (countryData?.exchangeRate || 1)
+                        },ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BudgetBreakdown } from '@/components/budget-breakdown';
 import { LoadingSpinner } from '@/components/loading-spinner';
@@ -87,14 +96,29 @@ export default function BudgetSummaryPage() {
   
   const { dailyCostMXN, dailyCostLocal, localCurrency } = calculationResults;
   
-  // Calculate weekly cost (weeks instead of days)
-  const weeklyCostMXN = dailyCostMXN * 7;
-  const weeklyCostLocal = dailyCostLocal * 7;
-  const durationInWeeks = Math.ceil(duration / 7);
+  // Calculate one-time costs
+  const oneTimeCostsMXN = (
+    (countryData?.oneTimeCosts?.vuelo || 0) +
+    (countryData?.oneTimeCosts?.comunicaciones || 0) +
+    ((countryData?.oneTimeCosts?.entradas || 0) * numberOfEvents) +
+    ((countryData?.oneTimeCosts?.bebidasEvento || 0) * numberOfEvents) +
+    (countryData?.oneTimeCosts?.souvenirs || 0) +
+    (countryData?.monthlyCosts?.seguros || 0)
+  ) * (countryData?.exchangeRate || 1);
   
-  // Calculate total trip cost
-  const totalCostMXN = dailyCostMXN * duration;
-  const totalCostLocal = dailyCostLocal * duration;
+  const oneTimeCostsLocal = (
+    (countryData?.oneTimeCosts?.vuelo || 0) +
+    (countryData?.oneTimeCosts?.comunicaciones || 0) +
+    ((countryData?.oneTimeCosts?.entradas || 0) * numberOfEvents) +
+    ((countryData?.oneTimeCosts?.bebidasEvento || 0) * numberOfEvents) +
+    (countryData?.oneTimeCosts?.souvenirs || 0) +
+    (countryData?.monthlyCosts?.seguros || 0)
+  );
+  
+  // Calculate total trip cost (daily costs + one-time costs)
+  const totalCostMXN = (dailyCostMXN * duration) + oneTimeCostsMXN;
+  const totalCostLocal = (dailyCostLocal * duration) + oneTimeCostsLocal;
+  const durationInWeeks = Math.ceil(duration / 7);
   
   // Calculate benefits/savings
   const benefits = calculateBenefits(countryData, duration, startMonth, startYear);
@@ -114,12 +138,12 @@ export default function BudgetSummaryPage() {
         >
           
           {/* Header */}
-          <div className="text-center space-y-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
               Tu presupuesto de intercambio
             </h1>
-            <p className="text-lg text-gray-600">
-              Costos semanales estimados y oportunidades de ahorro
+            <p className="text-base text-gray-600">
+              Costos diarios estimados y oportunidades de ahorro
             </p>
           </div>
           
@@ -148,7 +172,7 @@ export default function BudgetSummaryPage() {
                     <div className="flex items-center space-x-6 text-gray-600">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4" />
-                        <span>{durationInWeeks} semana{durationInWeeks > 1 ? 's' : ''}</span>
+                        <span>{duration} {duration === 1 ? 'día' : 'días'}</span>
                       </div>
                       
                       <div className="flex items-center space-x-2">
@@ -167,87 +191,85 @@ export default function BudgetSummaryPage() {
                 </CardContent>
               </Card>
               
-              {/* Weekly Cost Card */}
+              {/* Daily Cost and Total Trip Cost - Combined */}
               <Card className="bg-gradient-to-r from-[#00CF0C] to-[#007400] text-white shadow-xl">
-                <CardContent className="p-8 text-center space-y-4">
-                  <h2 className="text-xl font-semibold">
-                    Para el intercambio necesitarás a la semana:
-                  </h2>
-                  
-                  <div className="space-y-2">
-                    <div className="text-4xl md:text-5xl font-bold">
-                      ${Math.round(weeklyCostMXN).toLocaleString('es-MX')} MXN
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 divide-x divide-white/30">
+                    {/* Daily Cost Section */}
+                    <div className="text-center space-y-1 pr-4">
+                      <h2 className="text-sm font-semibold">
+                        Gasto al día:
+                      </h2>
+                      
+                      <div className="space-y-0.5">
+                        <div className="text-xl md:text-2xl font-bold">
+                          ${Math.round(dailyCostMXN).toLocaleString('es-MX')} MXN
+                        </div>
+                        <div className="text-sm opacity-90">
+                          ${Math.round(dailyCostLocal).toLocaleString('es-MX')} • {localCurrency}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-lg opacity-90">
-                      ${Math.round(weeklyCostLocal).toLocaleString('es-MX')} • {localCurrency}
+                    
+                    {/* Total Cost Section */}
+                    <div className="text-center space-y-1 pl-4">
+                      <h2 className="text-sm font-semibold">Gasto total del viaje</h2>
+                      <div className="space-y-0.5">
+                        <div className="text-xl md:text-2xl font-bold">
+                          ${Math.round(totalCostMXN).toLocaleString('es-MX')} MXN
+                        </div>
+                        <div className="text-sm opacity-90">
+                          ${Math.round(totalCostLocal).toLocaleString('es-MX')} • {localCurrency}
+                        </div>
+                        <p className="text-xs opacity-80">
+                          {duration} {duration === 1 ? 'día' : 'días'} en {travelSelection?.country}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Total Trip Cost */}
-              <Card className="border-2 border-[#00CF0C]">
-                <CardContent className="p-6 text-center space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900">Gasto total del viaje</h2>
-                  <div className="space-y-2">
-                    <div className="text-3xl font-bold text-[#00CF0C]">
-                      ${Math.round(totalCostMXN).toLocaleString('es-MX')} MXN
-                    </div>
-                    <div className="text-lg text-gray-600">
-                      ${Math.round(totalCostLocal).toLocaleString('es-MX')} • {localCurrency}
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      {durationInWeeks} {durationInWeeks === 1 ? 'semana' : 'semanas'} en {travelSelection?.country}
-                    </p>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Weekly and One-off Costs Breakdown */}
+              {/* Daily and One-off Costs Breakdown */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    ¿Cuánto necesitarías a la semana?
+                    ¿Cuánto necesitarías al día?
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Weekly Breakdown */}
+                  {/* Daily Breakdown */}
                   <div>
-                    <h4 className="font-semibold text-gray-700 mb-3">Desglose por categoría (semanal)</h4>
+                    <h4 className="font-semibold text-gray-700 mb-3">Desglose por categoría (diario)</h4>
                     <div className="space-y-3">
                       {[
                         { 
                           icon: '🏠', 
                           label: 'Hospedaje', 
-                          weeklyMXN: ((countryData?.monthlyCosts?.hospedaje || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
+                          dailyMXN: ((countryData?.monthlyCosts?.hospedaje || 0) / 30) * (countryData?.exchangeRate || 1)
                         },
                         { 
                           icon: '🍽️', 
                           label: 'Alimentos', 
-                          weeklyMXN: ((countryData?.monthlyCosts?.alimentos || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
+                          dailyMXN: ((countryData?.monthlyCosts?.alimentos || 0) / 30) * (countryData?.exchangeRate || 1)
                         },
                         { 
                           icon: '🚗', 
                           label: 'Transporte', 
-                          weeklyMXN: ((countryData?.monthlyCosts?.transporte || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
+                          dailyMXN: ((countryData?.monthlyCosts?.transporte || 0) / 30) * (countryData?.exchangeRate || 1)
                         },
                         { 
                           icon: '🎮', 
                           label: 'Entretenimiento', 
-                          weeklyMXN: ((countryData?.monthlyCosts?.entretenimiento || 0) / 30) * 7 * (countryData?.exchangeRate || 1)
-                        },
-                        { 
-                          icon: '🛡️', 
-                          label: 'Seguros/Trámites', 
-                          weeklyMXN: ((countryData?.monthlyCosts?.seguros || 0) / duration) * 7 * (countryData?.exchangeRate || 1)
+                          dailyMXN: ((countryData?.monthlyCosts?.entretenimiento || 0) / 30) * (countryData?.exchangeRate || 1)
                         }
-                      ].filter(item => item.weeklyMXN > 0).map((item, index) => (
+                      ].filter(item => item.dailyMXN > 0).map((item, index) => (
                         <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
                           <div className="flex items-center space-x-3">
                             <span className="text-lg">{item.icon}</span>
                             <span className="text-gray-700">{item.label}</span>
                           </div>
-                          <span className="font-semibold">${Math.round(item.weeklyMXN).toLocaleString('es-MX')}</span>
+                          <span className="font-semibold">${Math.round(item.dailyMXN).toLocaleString('es-MX')}</span>
                         </div>
                       ))}
                     </div>
@@ -264,7 +286,12 @@ export default function BudgetSummaryPage() {
                           amountMXN: (countryData?.oneTimeCosts?.vuelo || 0) * (countryData?.exchangeRate || 1)
                         },
                         { 
-                          icon: '📱', 
+                          icon: '�️', 
+                          label: 'Seguros/Trámites', 
+                          amountMXN: (countryData?.monthlyCosts?.seguros || 0) * (countryData?.exchangeRate || 1)
+                        },
+                        { 
+                          icon: '�📱', 
                           label: 'Paquetes de datos y WiFi', 
                           amountMXN: (countryData?.oneTimeCosts?.comunicaciones || 0) * (countryData?.exchangeRate || 1)
                         },
