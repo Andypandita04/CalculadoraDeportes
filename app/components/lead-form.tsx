@@ -146,7 +146,7 @@ export function LeadForm({ onSuccess }: LeadFormProps) {
           </div>
           <div className="flex-1">
             <CardTitle className="text-lg md:text-xl leading-tight mb-2">
-              Accede a estos beneficios
+              Ten acceso a estos beneficios
             </CardTitle>
             <div className="space-y-1">
               <p className="text-sm text-gray-600">
