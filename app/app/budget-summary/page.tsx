@@ -133,7 +133,7 @@ export default function BudgetSummaryPage() {
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
               Tu presupuesto de viaje
             </h1>
-            <p className="text-base text-gray-600">
+            <p className=" font-bold text-gray-900">
               Costos diarios estimados y oportunidades de ahorro
             </p>
           </div>

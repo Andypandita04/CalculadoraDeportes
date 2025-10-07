@@ -139,11 +139,25 @@ export function LeadForm({ onSuccess }: LeadFormProps) {
   
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center space-x-2">
-          <Star className="h-5 w-5 text-[#00CF0C]" />
-          <span>Obtén tu plan de ahorro personalizado</span>
-        </CardTitle>
+      <CardHeader className="space-y-3">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0">
+            <Star className="h-6 w-6 text-[#00CF0C]" />
+          </div>
+          <div className="flex-1">
+            <CardTitle className="text-lg md:text-xl leading-tight mb-2">
+              Accede a estos beneficios
+            </CardTitle>
+            <div className="space-y-1">
+              <p className="text-sm text-gray-600">
+                Por solo <span className="font-bold text-[#00CF0C] text-base">$49 MXN/mes</span>
+              </p>
+              <p className="text-sm text-gray-500">
+                Crea tu cuenta y espera nuestro lanzamiento
+              </p>
+            </div>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

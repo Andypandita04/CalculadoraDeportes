@@ -83,7 +83,7 @@ export default function BenefitsBreakdownPage() {
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Maximiza tu presupuesto de viaje
+              Conoce los beneficios de nuestra membresía 
             </h1>
             <p className="text-lg text-gray-600">
               Descubre cómo puedes ahorrar más para tu viaje a {travelSelection?.country}
